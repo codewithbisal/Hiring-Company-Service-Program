@@ -1,0 +1,70 @@
+# Constants
+BOAT_COUNT = 10
+HOURLY_RATE = 20
+HALF_HOUR_RATE = 12
+OPENING_TIME = 10
+CLOSING_TIME = 17
+
+# Data structure to store information for each boat
+boats = [{'hired': False, 'return_time': None, 'hours_hired': 0, 'money_taken': 0} for _ in range(BOAT_COUNT)]
+
+def calculate_money_for_one_boat(boat_number, current_time):
+    print(f"\nTask 1 - Calculate money for Boat {boat_number}")
+    
+    if not boats[boat_number - 1]['hired']:
+        try:
+            hire_duration = float(input("Enter the number of hours to hire (0.5 for half hour, 1 for one hour): "))
+            
+            if current_time < OPENING_TIME or current_time + hire_duration > CLOSING_TIME:
+                print("Invalid time. Boats can only be hired between 10:00 and 17:00.")
+                return
+            
+            if hire_duration == 0.5:
+                cost = HALF_HOUR_RATE
+            elif hire_duration == 1:
+                cost = HOURLY_RATE
+            else:
+                print("Invalid duration. Please enter 0.5 for half hour or 1 for one hour.")
+                return
+
+            boats[boat_number - 1]['hired'] = True
+            boats[boat_number - 1]['return_time'] = current_time + hire_duration
+            boats[boat_number - 1]['hours_hired'] += hire_duration
+            boats[boat_number - 1]['money_taken'] += cost
+
+            print(f"Boat {boat_number} hired for {hire_duration} hours. Money taken: ${cost:.2f}")
+        except ValueError:
+            print("Invalid input. Please enter a valid number.")
+    else:
+        print(f"Boat {boat_number} is already hired. Return time: {boats[boat_number - 1]['return_time']}")
+
+def find_next_available_boat(current_time):
+    print("\nTask 2 - Find the next available boat")
+    available_boats = [i + 1 for i in range(BOAT_COUNT) if not boats[i]['hired']]
+    
+    if available_boats:
+        print(f"Available boats: {available_boats}")
+    else:
+        earliest_return_time = min(boats, key=lambda x: x['return_time'])['return_time']
+        print(f"No boats available. Earliest available time: {earliest_return_time}")
+
+def calculate_money_for_all_boats():
+    print("\nTask 3 - Calculate money for all boats at the end of the day")
+    total_money = sum(boat['money_taken'] for boat in boats)
+    total_hours_hired = sum(boat['hours_hired'] for boat in boats)
+    unused_boats = [i + 1 for i in range(BOAT_COUNT) if boats[i]['hours_hired'] == 0]
+    most_used_boat = max(boats, key=lambda x: x['hours_hired'])['hours_hired']
+
+    print(f"Total money taken: ${total_money:.2f}")
+    print(f"Total hours boats were hired: {total_hours_hired} hours")
+    print(f"Boats not used: {unused_boats}")
+    print(f"Boat used the most: {most_used_boat} with {most_used_boat} hours")
+    
+if __name__ == "__main__":
+    current_time = float(input("Enter the current time (24-hour format): "))
+    
+    for boat_number in range(1, BOAT_COUNT + 1):
+        calculate_money_for_one_boat(boat_number, current_time)
+    
+    find_next_available_boat(current_time)
+    calculate_money_for_all_boats()
